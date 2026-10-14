@@ -3,9 +3,9 @@
 set -Eeuo pipefail
 umask 077
 
-# SAFE RESTORE PREFLIGHT ONLY
-# Verifies checksum (when a sidecar exists), decryption, archive readability,
-# and basic archive paths. Does not extract files or start services.
+# Verifies a required SHA-256 checksum, archive decryption,
+# readability, and basic archive paths.
+# Does not extract files or start services.
 
 if [[ $# -ne 2 ]]; then
   echo "Usage: $0 BACKUP_ARCHIVE.age DESTINATION_PATH" >&2
@@ -36,24 +36,20 @@ if [[ -e "$DEST" || -L "$DEST" ]]; then
   exit 1
 fi
 
-PARENT="$(dirname "$DEST")"
-mkdir -p "$PARENT"
-
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/restore-check.XXXXXX")"
 chmod 700 "$WORK"
 trap 'rm -rf -- "$WORK"' EXIT
 
-if [[ -f "$CHECKSUM" ]]; then
-  echo "Verifying SHA-256 checksum..."
-  (
-    cd "$(dirname "$ARCHIVE")"
-    sha256sum -c "$(basename "$CHECKSUM")"
-  )
-else
-  echo "WARNING: No checksum sidecar found at:"
-  echo "$CHECKSUM"
-  echo "Continuing with decryption and archive checks only."
+if [[ ! -f "$CHECKSUM" ]]; then
+  echo "ERROR: Checksum file not found: $CHECKSUM" >&2
+  exit 1
 fi
+
+echo "Verifying SHA-256 checksum..."
+(
+  cd "$(dirname "$ARCHIVE")"
+  sha256sum -c "$(basename "$CHECKSUM")"
+)
 
 echo "Checking decryption and archive readability..."
 age -d "$ARCHIVE" | tar -tzf - > "$WORK/archive-list.txt"
@@ -94,6 +90,10 @@ echo
 echo "Components found for review:"
 grep -E '(^|/)(config.yaml|auth.json|state.db|data.sqlite|hermes-gateway.service|9router-image.tar)$' \
   "$WORK/archive-list.txt" || true
+
+echo
+echo "Destination path is available."
+echo "No destination directory was created."
 
 echo
 echo "Preflight completed."
