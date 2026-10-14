@@ -1,49 +1,72 @@
-# 9Router Configuration
+# 9Router Configuration and Recovery
 
-## Current Deployment Reference
+## 1. Existing Deployment
 
-The existing deployment uses the following configuration:
+The current Hostinger deployment uses:
 
 - Docker image: `decolua/9router:latest`
 - Container name: `9router`
-- API port: `20128`
+- Host port: `20128`
 - Host binding: `127.0.0.1`
 - Persistent data directory: `/root/.9router`
-- Container data directory: `/app/data`
+- Container data directory in the current Compose template: `/app/data`
 
-## Network Security
+These values are based on the existing deployment inventory. The complete restoration procedure has not yet been validated.
 
-The API is bound to localhost by default:
+## 2. Network Configuration
 
-`127.0.0.1:20128`
+The intended local API endpoint is:
 
-This prevents direct access through the VPS public network interface.
+`http://127.0.0.1:20128/v1`
 
-For remote administration, use an authenticated and encrypted access method rather than exposing the API port publicly.
+The port should remain bound to localhost by default. Do not expose the API directly to the public internet.
 
-## Persistent Data
+## 3. Persistent Data
 
-The existing deployment stores persistent data in `/root/.9router`.
+The `/root/.9router` directory contains application data that must be preserved during migration.
 
-Before restoring on another VPS:
+Before restoring:
 
-1. Stop the destination container if it is already running.
-2. Back up any existing destination data.
-3. Restore the verified private backup to the intended directory.
-4. Check ownership and permissions.
-5. Start the container and validate its operation.
+1. Verify the encrypted backup.
+2. Create a backup of any existing destination data.
+3. Inspect the archive contents.
+4. Restore data to the correct application directory.
+5. Check file permissions and ownership.
+6. Start the container and inspect its logs.
 
-Do not overwrite the source VPS data during migration.
+Never overwrite the source VPS data as part of the migration.
 
-## Configuration Validation
+## 4. Image and Configuration Validation
 
-Before using the public Compose template in production, verify:
+Before production use, verify:
 
-- Required environment variables.
-- Authentication settings.
-- Persistent data requirements.
-- Compatibility of the selected Docker image.
+- The exact image version and digest.
+- Required environment variables and startup options.
+- The actual persistent data path inside the container.
+- Authentication requirements.
+- Database migration or initialization behavior.
 - API connectivity from Hermes Agent.
-- Container startup and restart behavior.
 
-The Compose file in this repository is a deployment template based on the existing container's visible configuration. It has not yet been validated as a complete restoration procedure.
+Do not assume that the `latest` image tag will always refer to the same version.
+
+## 5. Security
+
+- Keep API credentials outside the public repository.
+- Do not commit `.env` files containing secrets.
+- Do not publish private databases or configuration files.
+- Keep the API bound to localhost unless a reviewed alternative is required.
+- Store encrypted backups separately from the source VPS.
+
+## 6. Validation Checklist
+
+- [ ] Container starts successfully.
+- [ ] Persistent data is present.
+- [ ] API responds on localhost.
+- [ ] Authentication works.
+- [ ] Hermes Agent can connect to the API.
+- [ ] A test model request succeeds.
+- [ ] Container restart behavior is verified.
+
+## 7. Recovery Status
+
+This document describes the existing deployment and intended recovery requirements. The Compose template and restoration procedure must be tested on a separate VPS before production migration.
