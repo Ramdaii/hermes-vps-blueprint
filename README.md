@@ -1,20 +1,22 @@
 # Hermes VPS Blueprint
 
-A reproducible setup for deploying and restoring Hermes Agent and 9Router on a Linux VPS.
+A reusable deployment and recovery blueprint for Hermes Agent and 9Router on Linux VPS environments.
 
-## Goals
+## Project Goals
 
-- Document the installation of Hermes Agent and 9Router.
-- Keep deployment scripts and configuration templates version-controlled.
-- Separate public installation files from private credentials and backups.
-- Provide a repeatable recovery process when moving between VPS providers.
+- Rebuild the environment when changing VPS providers.
+- Document installation and recovery procedures.
+- Keep public deployment scripts separate from private application data.
+- Protect credentials, conversation history, and encrypted backups.
+- Make recovery repeatable and verifiable.
 
 ## Components
 
-- Hermes Agent
-- 9Router using Docker
-- Hermes Gateway managed by systemd
-- Configuration templates and recovery documentation
+- **Hermes Agent** — AI agent runtime and integrations.
+- **9Router** — AI model routing through Docker.
+- **Hermes Gateway** — managed through systemd.
+- **Private backup** — encrypted application data and configuration.
+- **GitHub repository** — public scripts, sanitized templates, and documentation.
 
 ## Repository Structure
 
@@ -22,39 +24,54 @@ A reproducible setup for deploying and restoring Hermes Agent and 9Router on a L
 hermes-vps-blueprint/
 ├── README.md
 ├── .gitignore
-├── install/
-├── hermes/
 ├── 9router/
+│   └── compose.yaml
 ├── scripts/
+│   └── preflight.sh
 └── docs/
+    ├── installation.md
+    └── backup.md
 ```
+
+## Getting Started
+
+1. Read `docs/installation.md`.
+2. Review the target VPS operating system and resources.
+3. Review `9router/compose.yaml` before using it.
+4. Run the preflight checks on the target VPS.
+5. Follow the installation procedure for compatible software versions.
+6. Restore private configuration only from a verified backup.
+7. Test the model connection, gateway, and integrations before production use.
+
+## Backup and Recovery
+
+Read `docs/backup.md` for the backup strategy, encryption requirements, integrity checks, and recovery checklist.
+
+Private backups must be stored outside this public repository.
 
 ## Security
 
-**Never commit secrets or private backups to this repository.**
+Never commit:
 
-Do not upload:
+- API keys or provider credentials.
+- Telegram bot tokens.
+- Private authentication files.
+- Conversation history, memory, or application databases.
+- Backup archives or encryption passphrases.
+- Unredacted configuration files.
 
-- API keys or provider credentials
-- Telegram bot tokens
-- `.env` files containing secrets
-- Authentication files such as `auth.json`
-- Private databases, conversation histories, or memory files
-- Encrypted backup archives or backup passphrases
+The `.gitignore` file helps prevent accidental additions but is not a substitute for reviewing files before committing.
 
-Use environment variables or another secure secret-management method for credentials.
+## Current Status
 
-## Recovery Overview
+This repository is being built incrementally.
 
-1. Prepare a supported Linux VPS.
-2. Install the required system dependencies.
-3. Deploy 9Router and configure its persistent storage.
-4. Install Hermes Agent and configure its gateway.
-5. Restore private configuration and data from an independently stored backup.
-6. Validate the AI provider, Telegram integration, and gateway service.
+The documentation and scripts must be reviewed and tested against the selected software versions before being used for production recovery.
 
-Detailed installation and recovery instructions will be added as the scripts are validated.
+A successful backup decryption does not, by itself, prove that a complete application restore will succeed.
 
-## Important
+## Migration Policy
 
-This repository is a deployment blueprint. A successful Git clone alone does not restore private data, credentials, conversation history, or provider access.
+Keep the original VPS running until the replacement environment has been restored and validated.
+
+Do not decommission the source server until the new deployment works and an independent recovery copy is available.
