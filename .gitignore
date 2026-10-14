@@ -1,0 +1,48 @@
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+auth.json
+*secret*.json
+*credentials*.json
+*.pem
+*.key
+
+# Private backups and archives
+*.age
+*.enc
+*.tar
+*.tar.gz
+*.zip
+*.bak
+
+# Private application data
+state.db*
+projects.db*
+kanban.db*
+shared-state.db*
+data.sqlite*
+sessions/
+memories/
+pending_messages/
+logs/
+
+# Local configuration
+config.yaml
+config.yml
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# Runtime files
+*.sock
+*.pid
+*.lock
+__pycache__/
+node_modules/
+
+# Backup working directory
+backup-hermes/
